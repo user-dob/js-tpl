@@ -9,11 +9,14 @@ var data = {
     {name: 'Name 1', age: 14},
     {name: 'Name 2', age: 14},
     {name: 'Name 3', age: 15},
+    {name: 'Name 4', age: 24},
+    {name: 'Name 4', age: 24},
+    {name: 'Name 4', age: 24},
     {name: 'Name 4', age: 24}
   ]
 }
 
-
+console.time('tpl')
 var text = document.getElementById('tpl-for').innerHTML;
 var frag = document.createDocumentFragment();
 
@@ -22,29 +25,18 @@ var xml = parser.parseFromString(text, 'application/xml');
 var node = xml.documentElement;
 parseTemplate(frag, node, data)
 
-//console.log(node.childNodes)
-
 function parseTemplate(frag, node, data) {
   var nodes = node.childNodes;
   for(var i=0; i<nodes.length; i++) {
     var node = nodes[i];
+    switch(node.tagName) {
+      case 'for':
+        parseFor(frag, node, data);
+        break;
 
-    if(node.nodeType == 1) {
-
-      switch(node.tagName) {
-        case 'for':
-          parseFor(frag, node, data);
-          break;
-
-        default:
-          parseEl(frag, node, data)
-          break;
-      }
-    }
-
-    if(node.nodeType == 3) {
-      var el = document.createTextNode(parseText(node.textContent, data));
-      frag.appendChild(el);
+      default:
+        parseEl(frag, node, data)
+        break;
     }
   };
 }
@@ -53,8 +45,6 @@ function parseFor(frag, node, data) {
   var condition = node.getAttribute('condition'),
     nodes = node.childNodes,
     itemName, itemsName, o = {};
-
-  console.log(nodes);
 
   condition.replace(/\s*(\w+)\sin\s(\w+)\s*/g, function(math, item, items) {
     itemName = item;
@@ -65,32 +55,33 @@ function parseFor(frag, node, data) {
     data[itemsName].forEach(function(item) {
       o[itemName] = item;
       for(var i=0; i<nodes.length; i++) {
-        var node = nodes[i];
-        if(node.nodeType == 1) {
-          parseEl(frag, node, o);
-        }
-        if(node.nodeType == 3) {
-          var el = document.createTextNode(parseText(node.textContent, data));
-          frag.appendChild(el);
-        }
+        parseEl(frag, nodes[i], o);
       }
     });
   }
 }
 
 function parseEl(frag, node, data) {
-  var el = document.createElement(node.tagName);
 
-  var attributes = node.attributes;
-  for(var j = 0; j<attributes.length; j++) {
-    var attr = attributes[j];
-    el.setAttribute(attr.name, parseText(attr.value, data));
+  if(node.nodeType == 1) {
+    var el = document.createElement(node.tagName);
+
+    var attributes = node.attributes;
+    for(var j = 0; j<attributes.length; j++) {
+      var attr = attributes[j];
+      el.setAttribute(attr.name, parseText(attr.value, data));
+    }
+
+    if(node.childNodes.length) {
+      parseTemplate(el, node, data);
+    }
+    frag.appendChild(el);
   }
 
-  if(node.childNodes.length) {
-    parseTemplate(el, node, data);
+  if(node.nodeType == 3) {
+    var el = document.createTextNode(parseText(node.textContent, data));
+    frag.appendChild(el);
   }
-  frag.appendChild(el);
 }
 
 
@@ -109,14 +100,13 @@ function get(o, path) {
       o = o[name];
     }
   });
-
   return o;
 };
 
 
 document.getElementById('div').appendChild(frag);
 
-
+console.timeEnd('tpl')
 
 
 
