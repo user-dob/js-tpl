@@ -3,9 +3,24 @@
   <head>
   </head>
   <body>
+
 	<div id="div"></div>
 
-    <script type="text/xml" id="tpl">
+    <script type="application/xml" id="tpl">
+        <template>
+            <div>{title}</div>
+            Hello {name}
+            <span id="id" class="{class}">{name}</span>
+            <div>
+                <h1>{title} - title</h1>
+                <div class="a-{class}">
+                    <p><h2>{name}</h2></p>
+                </div>
+            </div>
+        </template>
+    </script>
+
+    <script type="application/xml" id="tpl-1">
         <template>
             <div>{title}</div>
 
@@ -18,7 +33,10 @@
         </template>
     </script>
 
-    <script src="tpl-new.js"></script>
+
+    <!--script src="tpl-new.js"></script-->
+    <script src="fragment.js"></script>
+
 
   </body>
 </html>
