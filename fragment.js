@@ -1,11 +1,20 @@
 var data = {
   title: 'Title',
   name: 'Name',
-  class: 'Class'
+  class: 'Class',
+  user: {
+    name: 'Rem'
+  },
+  users: [
+    {name: 'Name 1', age: 14},
+    {name: 'Name 2', age: 14},
+    {name: 'Name 3', age: 15},
+    {name: 'Name 4', age: 24}
+  ]
 }
 
 
-var text = document.getElementById('tpl').innerHTML;
+var text = document.getElementById('tpl-for').innerHTML;
 var frag = document.createDocumentFragment();
 
 var parser = new DOMParser();
@@ -21,18 +30,16 @@ function parseTemplate(frag, node, data) {
     var node = nodes[i];
 
     if(node.nodeType == 1) {
-      var el = document.createElement(node.tagName);
 
-      var attributes = node.attributes;
-      for(var j = 0; j<attributes.length; j++) {
-        var attr = attributes[j];
-        el.setAttribute(attr.name, parseText(attr.value, data));
-      }
+      switch(node.tagName) {
+        case 'for':
+          parseFor(frag, node, data);
+          break;
 
-      if(node.childNodes.length) {
-        parseTemplate(el, node, data);
+        default:
+          parseEl(frag, node, data)
+          break;
       }
-      frag.appendChild(el);
     }
 
     if(node.nodeType == 3) {
@@ -40,6 +47,50 @@ function parseTemplate(frag, node, data) {
       frag.appendChild(el);
     }
   };
+}
+
+function parseFor(frag, node, data) {
+  var condition = node.getAttribute('condition'),
+    nodes = node.childNodes,
+    itemName, itemsName, o = {};
+
+  console.log(nodes);
+
+  condition.replace(/\s*(\w+)\sin\s(\w+)\s*/g, function(math, item, items) {
+    itemName = item;
+    itemsName = items;
+  });
+
+  if(data[itemsName]) {
+    data[itemsName].forEach(function(item) {
+      o[itemName] = item;
+      for(var i=0; i<nodes.length; i++) {
+        var node = nodes[i];
+        if(node.nodeType == 1) {
+          parseEl(frag, node, o);
+        }
+        if(node.nodeType == 3) {
+          var el = document.createTextNode(parseText(node.textContent, data));
+          frag.appendChild(el);
+        }
+      }
+    });
+  }
+}
+
+function parseEl(frag, node, data) {
+  var el = document.createElement(node.tagName);
+
+  var attributes = node.attributes;
+  for(var j = 0; j<attributes.length; j++) {
+    var attr = attributes[j];
+    el.setAttribute(attr.name, parseText(attr.value, data));
+  }
+
+  if(node.childNodes.length) {
+    parseTemplate(el, node, data);
+  }
+  frag.appendChild(el);
 }
 
 
