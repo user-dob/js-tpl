@@ -20,23 +20,37 @@
         </template>
     </script>
 
+    <script type="application/xml" id="tpl-code">
+        <template>
+            <code>
+            </code>
+        </template>
+    </script>
+
+
     <script type="application/xml" id="tpl-for">
         <template>
             <div>{title}</div>
 
             <span class="{class}">{name}</span>
 
+            <if condition="{name} <= 'Name'">
+                <h1 class="test">{name}</h1>
+            </if>
+
             <for condition="user in users">
                 <h3>{user.name}</h3>
                 <span>{user.age}</span>
+                <ul>
+                <for condition="post in user.posts">
+                    <li>{post.title}</li>
+                </for>
+                </ul>
             </for>
         </template>
     </script>
 
-
-    <!--script src="tpl-new.js"></script-->
     <script src="fragment.js"></script>
-
 
   </body>
 </html>
