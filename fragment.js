@@ -11,16 +11,31 @@ var data = {
     {name: 'Name 3', age: 15},
     {name: 'Name 4', age: 24},
     {name: 'Name 4', age: 24},
+    {name: 'Name 4', age: 24, posts: [{title: 'post 1'}, {title: 'post 2'}, {title: 'post 3'}]},
     {name: 'Name 4', age: 24},
-    {name: 'Name 4', age: 24}
   ]
+}
+
+for(var i=1; i<100; i++) {
+  data.users.push({
+    name: 'Name ' + i,
+    age: parseInt(90*Math.random()),
+    posts: [{title: 'post 1'}, {title: 'post 2'}, {title: 'post 3'}]
+  })
 }
 
 console.time('tpl')
 var text = document.getElementById('tpl-for').innerHTML;
+
+text = text.replace(/[ \t\n\r]*</g, '<');
 text = text.replace(/condition="([\s\S]*?)"/g, function(math, p) {
-    return 'condition="' + escape(p) + '"';
+  return 'condition="' + htmlEntities(p) + '"';
 });
+
+
+function htmlEntities(text) {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
 
 //console.log(text)
 
@@ -28,7 +43,7 @@ var frag = document.createDocumentFragment();
 
 var xml = (new DOMParser()).parseFromString(text, 'application/xml');
 
-//console.log(xml)
+//console.log(xml.documentElement.childNodes)
 
 var node = xml.documentElement;
 parseTemplate(frag, node, data)
@@ -58,15 +73,8 @@ function parseNode(frag, node, data) {
 
 function parseIf(frag, node, data) {
     var condition = node.getAttribute('condition');
-    condition = unescape(condition);
     condition = condition.replace(/\{([^{}]*)\}/g, 'data.$1');
-
-    //console.log(condition)
-
     condition = eval(condition);
-
-    //console.log(condition)
-
     if(condition) {
         parseTemplate(frag, node, data);
     }
@@ -76,8 +84,6 @@ function parseFor(frag, node, data) {
   var condition = node.getAttribute('condition'),
     nodes = node.childNodes,
     itemName, itemsName, o = {};
-
-  condition = unescape(condition);
 
   condition.replace(/\s*(\w+)\sin\s([\w\.]+)\s*/g, function(math, item, items) {
     itemName = item;

@@ -34,23 +34,32 @@
 
             <span class="{class}">{name}</span>
 
-            <if condition="{name} <= 'Name'">
+            <if condition="{name} == 'Name'">
+                <h1 class="test">{name}</h1>
+             <else/>
                 <h1 class="test">{name}</h1>
             </if>
+
+   <![CDATA[
+
+   ]]>
 
             <for condition="user in users">
                 <h3>{user.name}</h3>
                 <span>{user.age}</span>
-                <ul>
-                <for condition="post in user.posts">
-                    <li>{post.title}</li>
-                </for>
-                </ul>
+                <if condition="{user.age} >= 24">
+                    <ul>
+                    <for condition="post in user.posts">
+                        <li>{post.title}</li>
+                    </for>
+                    </ul>
+                </if>
             </for>
+
         </template>
     </script>
 
-    <script src="fragment.js"></script>
+    <script src="core.js"></script>
 
   </body>
 </html>
