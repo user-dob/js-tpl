@@ -1,6 +1,14 @@
-var jsTpl = (function(document) {
+function JsTpl(tpl) {
+    var frag = document.createDocumentFragment();
+    var range = document.createRange();
+    var compiler;
 
-    window.watchs = {};
+    tpl = tpl.replace(/[ \t\n\r]*</g, '<');
+    tpl = tpl.replace(/condition="([\s\S]*?)"/g, function(math, p) {
+        return 'condition="' + htmlEntities(p) + '"';
+    });
+
+    compiler = (new DOMParser()).parseFromString(tpl, 'application/xml');
 
     function htmlEntities(text) {
         return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -66,11 +74,7 @@ var jsTpl = (function(document) {
             var attributes = node.attributes;
             for(var j = 0; j<attributes.length; j++) {
                 var attr = attributes[j];
-                if(attr.name === 'watch') {
-                    watchs[attr.value] = el;
-                } else {
-                    el.setAttribute(attr.name, parseText(attr.value, data));
-                }
+                el.setAttribute(attr.name, parseText(attr.value, data));
             }
 
             if(node.childNodes.length) {
@@ -80,8 +84,7 @@ var jsTpl = (function(document) {
         }
 
         if(node.nodeType == 3) {
-            var el = document.createTextNode(parseText(node.textContent, data));
-            frag.appendChild(el);
+            frag.appendChild(range.createContextualFragment(parseText(node.textContent, data)));
         }
     };
 
@@ -104,27 +107,11 @@ var jsTpl = (function(document) {
         return o;
     };
 
-    var compiler;
-
-    return function(text, data) {
-        var frag = document.createDocumentFragment();
-
-        if(!compiler) {
-            text = text.replace(/[ \t\n\r]*</g, '<');
-            text = text.replace(/condition="([\s\S]*?)"/g, function(math, p) {
-                return 'condition="' + htmlEntities(p) + '"';
-            });
-
-            compiler = (new DOMParser()).parseFromString(text, 'application/xml');
-        }
-
+    return function(data) {
         parseTemplate(frag, compiler.documentElement, data);
-
         return frag;
-    };
-
-})(document);
-
+    }
+}
 
 var tpl = document.getElementById('tpl-for').innerHTML;
 var data = {
@@ -145,15 +132,7 @@ var data = {
     ]
 };
 
-console.time('js-tpl')
-var frag = jsTpl(tpl, data);
-window.watchs.div.firstChild.data = '!!!!!!!!!!!!!!!!';
-document.getElementById('div').appendChild(frag);
-console.timeEnd('js-tpl');
-
-
+var jsTpl = new JsTpl(tpl);
 console.time('js-tpl-compiler')
-var frag = jsTpl(tpl, data);
-document.getElementById('div').appendChild(frag);
+document.getElementById('div-compiler').appendChild(jsTpl(data));
 console.timeEnd('js-tpl-compiler');
-

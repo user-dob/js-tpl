@@ -5,12 +5,26 @@
   <body>
 
 	<div id="div"></div>
+    <div id="div-compiler"></div>
+
 
     <script type="application/xml" id="tpl">
         <template>
             <div>{title}</div>
             Hello {name}
             <span id="id" class="{class}">{name}</span>
+
+            <switch condition="{user.age}" >
+                <case value="12">
+                </case>
+                <case value="14">
+
+                </case>
+                <default>
+
+                </default>
+            </switch>
+
             <div>
                 <h1>{title} - title</h1>
                 <div class="a-{class}">
@@ -19,19 +33,6 @@
             </div>
         </template>
     </script>
-
-    <script type="application/xml" id="tpl-code">
-        <template>
-            <code>
-               <![CDATA[
-
-               ]]>
-            </code>
-			
-			<inqlude name="item({name: item.name})" />
-        </template>
-    </script>
-
 
     <script type="application/xml" id="tpl-for">
         <template>
