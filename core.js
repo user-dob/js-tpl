@@ -1,5 +1,7 @@
 var jsTpl = (function(document) {
 
+    window.watchs = {};
+
     function htmlEntities(text) {
         return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     };
@@ -64,7 +66,11 @@ var jsTpl = (function(document) {
             var attributes = node.attributes;
             for(var j = 0; j<attributes.length; j++) {
                 var attr = attributes[j];
-                el.setAttribute(attr.name, parseText(attr.value, data));
+                if(attr.name === 'watch') {
+                    watchs[attr.value] = el;
+                } else {
+                    el.setAttribute(attr.name, parseText(attr.value, data));
+                }
             }
 
             if(node.childNodes.length) {
@@ -98,15 +104,21 @@ var jsTpl = (function(document) {
         return o;
     };
 
+    var compiler;
+
     return function(text, data) {
         var frag = document.createDocumentFragment();
-        text = text.replace(/[ \t\n\r]*</g, '<');
-        text = text.replace(/condition="([\s\S]*?)"/g, function(math, p) {
-            return 'condition="' + htmlEntities(p) + '"';
-        });
 
-        var xml = (new DOMParser()).parseFromString(text, 'application/xml');
-        parseTemplate(frag, xml.documentElement, data);
+        if(!compiler) {
+            text = text.replace(/[ \t\n\r]*</g, '<');
+            text = text.replace(/condition="([\s\S]*?)"/g, function(math, p) {
+                return 'condition="' + htmlEntities(p) + '"';
+            });
+
+            compiler = (new DOMParser()).parseFromString(text, 'application/xml');
+        }
+
+        parseTemplate(frag, compiler.documentElement, data);
 
         return frag;
     };
@@ -135,5 +147,13 @@ var data = {
 
 console.time('js-tpl')
 var frag = jsTpl(tpl, data);
+window.watchs.div.firstChild.data = '!!!!!!!!!!!!!!!!';
 document.getElementById('div').appendChild(frag);
-console.timeEnd('js-tpl')
+console.timeEnd('js-tpl');
+
+
+console.time('js-tpl-compiler')
+var frag = jsTpl(tpl, data);
+document.getElementById('div').appendChild(frag);
+console.timeEnd('js-tpl-compiler');
+

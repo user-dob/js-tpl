@@ -23,14 +23,19 @@
     <script type="application/xml" id="tpl-code">
         <template>
             <code>
+               <![CDATA[
+
+               ]]>
             </code>
+			
+			<inqlude name="item({name: item.name})" />
         </template>
     </script>
 
 
     <script type="application/xml" id="tpl-for">
         <template>
-            <div>{title}</div>
+            <div watch="div" >{title}</div>
 
             <span class="{class}">{name}</span>
 
@@ -39,10 +44,6 @@
              <else/>
                 <h1 class="test">{name}</h1>
             </if>
-
-   <![CDATA[
-
-   ]]>
 
             <for condition="user in users">
                 <h3>{user.name}</h3>
