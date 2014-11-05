@@ -1,4 +1,5 @@
 function JsTpl(tpl) {
+    var elements = [];
     var range = document.createRange();
     var xml, compiler;
 
@@ -34,7 +35,7 @@ function JsTpl(tpl) {
             default:
                 parseEl(frag, node, data);
                 break;
-        }
+        };
     };
 
     function parseIf(frag, node, data) {
@@ -63,7 +64,7 @@ function JsTpl(tpl) {
                 o[itemName] = item;
                 parseTemplate(frag, node, o);
             });
-        }
+        };
     };
 
     function parseEl(frag, node, data) {
@@ -71,10 +72,13 @@ function JsTpl(tpl) {
         if(node.nodeType == 1) {
             var el = document.createElement(node.tagName);
 
+            elements.push(el);
+
             var attributes = node.attributes;
             for(var j = 0; j<attributes.length; j++) {
                 var attr = attributes[j];
                 el.setAttribute(attr.name, parseText(attr.value, data));
+                el.getAttributeNode(attr.name).tpl = attr.value;
             }
 
             if(node.childNodes.length) {
@@ -84,19 +88,30 @@ function JsTpl(tpl) {
         }
 
         if(node.nodeType == 3) {
-            frag.appendChild(range.createContextualFragment(parseText(node.textContent, data)));
+            var el = document.createTextNode(node.textContent);
+
+            elements.push(el);
+
+            el.textContent = parseText(node.textContent, data);
+            el.tpl = node.textContent;
+
+            frag.appendChild(el);
+
+            //frag.appendChild(range.createContextualFragment(parseText(node.textContent, data)));
         }
     };
 
 
+
+
     function parseText(text, data) {
         var value;
+        text = text || '';
         return text.replace(/\{([^{}]*)\}/g, function(math, p) {
             value = get(data, p);
             return value ? value : math;
         });
     };
-
 
     function get(o, path) {
         path.split('.').forEach(function(name) {
@@ -107,21 +122,39 @@ function JsTpl(tpl) {
         return o;
     };
 
+    var frag = document.createDocumentFragment();
+    parseTemplate(frag, compiler, {});
+
+    function parseCompilEl(el, data) {
+        if(el.nodeType == 1) {
+            var attributes = el.attributes;
+            for(var j = 0; j<attributes.length; j++) {
+                var attr = attributes[j];
+                el.setAttribute(attr.name, parseText(attr.tpl, data));
+            }
+        }
+
+        if(el.nodeType == 3) {
+            el.textContent = parseText(el.tpl, data);
+        }
+    }
+
+    //console.log(elements);
+
     return function(data) {
-        var frag = document.createDocumentFragment();
-        parseTemplate(frag, compiler, data);
+
+        elements.forEach(function(el) {
+            parseCompilEl(el, data);
+        });
+
         return frag;
     }
 }
 
 var tpl = document.getElementById('tpl-tree').innerHTML;
 var data = {
-    title: 'Title',
     name: 'Name',
     class: 'Class',
-    user: {
-        name: 'Rem'
-    },
     users: [
         {name: 'Name 1', age: 14, posts: [{title: 'post 1'}, {title: 'post 2'}, {title: 'post 3'}]},
         {name: 'Name 2', age: 14, posts: [{title: 'post 1'}, {title: 'post 2'}, {title: 'post 3'}]},
@@ -129,7 +162,7 @@ var data = {
         {name: 'Name 4', age: 24},
         {name: 'Name 4', age: 24},
         {name: 'Name 4', age: 24, posts: [{title: 'post 1'}, {title: 'post 2'}, {title: 'post 3'}]},
-        {name: 'Name 4', age: 24},
+        {name: 'Name 4', age: 24}
     ]
 };
 
@@ -139,5 +172,12 @@ document.getElementById('div').appendChild(jsTpl(data));
 console.timeEnd('js-tpl-compiler');
 
 console.time('js-tpl-compiler')
-document.getElementById('div').appendChild(jsTpl(data));
+data.name = 'Name 1';
+jsTpl(data);
+console.timeEnd('js-tpl-compiler');
+
+
+console.time('js-tpl-compiler')
+data.name = 'Name 2';
+jsTpl(data);
 console.timeEnd('js-tpl-compiler');

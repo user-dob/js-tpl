@@ -5,32 +5,26 @@
   <body>
 
 	<div id="div"></div>
-    <div id="div-compiler"></div>
+    <div id="dot-div"></div>
+	
 
-
-    <script type="application/xml" id="tpl">
+    <script type="application/xml" id="tpl-tree">
         <template>
-            <div>{title}</div>
-            Hello {name}
-            <span id="id" class="{class}">{name}</span>
-
-            <switch condition="{user.age}" >
-                <case value="12">
-                </case>
-                <case value="14">
-
-                </case>
-                <default>
-
-                </default>
-            </switch>
-
+            <div>{name}</div>
+            <div>{name}</div>
+            <div class="{class}">{name}</div>
+            <div>{name}</div>
             <div>
-                <h1>{title} - title</h1>
-                <div class="a-{class}">
-                    <p><h2>{user.name}</h2></p>
-                </div>
+                <div>{name}</div>
+                <div class="{class}">{name}</div>
+                <div>{name}</div>
+                <ul>
+                    <li>{name}</li>
+                    <li class="{class}">{name}</li>
+                </ul>
             </div>
+            <div>{name}</div>
+            <div>{name}</div>
         </template>
     </script>
 
@@ -61,7 +55,9 @@
         </template>
     </script>
 
-    <script src="core.js"></script>
+	
+	<script src="doT.js"></script>
+    <script src="core-compil.js"></script>
 
   </body>
 </html>
